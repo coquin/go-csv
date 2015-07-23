@@ -1,7 +1,9 @@
-package main
+package gocsv
 
-import "fmt"
+import (
+	"fmt"
+)
 
-func main() {
+func doStuff() {
 	fmt.Println("It works!")
 }

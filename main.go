@@ -3,6 +3,7 @@ package gocsv
 import (
 	"io"
 	"io/ioutil"
+	"strings"
 )
 
 type Reader struct {
@@ -11,9 +12,9 @@ type Reader struct {
 	Comma rune
 }
 
-func (r *Reader) Read() (record string, err error) {
+func (r *Reader) Read() (record []string, err error) {
 	if r.pos >= len(r.b) {
-		return "", io.EOF
+		return []string{}, io.EOF
 	}
 
 	delim := byte('\n')
@@ -25,7 +26,8 @@ func (r *Reader) Read() (record string, err error) {
 		}
 	}
 
-	record = string(r.b[r.pos:i])
+	str := string(r.b[r.pos:i])
+	record = strings.Split(str, string(r.Comma))
 	err = nil
 
 	r.pos = i + 1

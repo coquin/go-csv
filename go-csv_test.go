@@ -18,6 +18,13 @@ func TestRead(t *testing.T) {
 	testReadEnd(t, csvReader)
 }
 
+func TestCustomComma(t *testing.T) {
+	csvReader := NewReader(strings.NewReader("foo|bar|baz"))
+	csvReader.Comma = '|'
+
+	testReadStr(t, csvReader, []string{"foo", "bar", "baz"})
+}
+
 func testReadStr(t *testing.T, r *Reader, expected []string) {
 	rec, err := r.Read()
 

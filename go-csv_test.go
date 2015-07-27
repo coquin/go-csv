@@ -1,6 +1,7 @@
 package gocsv
 
 import (
+	"bytes"
 	"io"
 	"strings"
 	"testing"
@@ -18,11 +19,28 @@ func TestRead(t *testing.T) {
 	testReadEnd(t, csvReader)
 }
 
-func TestCustomComma(t *testing.T) {
+func TestReadCustomComma(t *testing.T) {
 	csvReader := NewReader(strings.NewReader("foo|bar|baz"))
 	csvReader.Comma = '|'
 
 	testReadStr(t, csvReader, []string{"foo", "bar", "baz"})
+}
+
+func TestWrite(t *testing.T) {
+	buf := bytes.NewBuffer([]byte{})
+	csvWriter := NewWriter(buf)
+
+	csvWriter.Write([]string{"foo", "bar", "baz"})
+	if buf.String() != "foo,bar,baz" {
+		t.Log("Write should write array of strings")
+		t.Fatal("expected", "foo,bar,baz", "got", buf.String())
+	}
+
+	csvWriter.Write([]string{"nyan", "cat", "wat"})
+	if buf.String() != "foo,bar,baz\nnyan,cat,wat" {
+		t.Log("Write should append array of strings")
+		t.Fatal("expected", "foo,bar,baz\\nnyan,cat,wat", "got", buf.String())
+	}
 }
 
 func testReadStr(t *testing.T, r *Reader, expected []string) {

@@ -19,6 +19,26 @@ func TestRead(t *testing.T) {
 	testReadEnd(t, csvReader)
 }
 
+func TestReadInLoop(t *testing.T) {
+	var str string
+
+	csvReader := NewReader(strings.NewReader("foo,bar,baz\nnyan,cat,wat"))
+
+	for {
+		rec, err := csvReader.Read()
+		str += strings.Join(rec, "")
+
+		if err == io.EOF {
+			break
+		}
+	}
+
+	if str != "foobarbaznyancatwat" {
+		t.Log("Should read till the end of reader in loop")
+		t.Fatal("expected", "foobarbaznyancatwat", "got", str)
+	}
+}
+
 func TestReadCustomComma(t *testing.T) {
 	csvReader := NewReader(strings.NewReader("foo|bar|baz"))
 	csvReader.Comma = '|'
@@ -61,8 +81,9 @@ func testReadEnd(t *testing.T, r *Reader) {
 	if !compareRecords(rec, []string{}) {
 		t.Log("Reading the end of the stream should return empty string")
 		t.Fatal("expected", "(empty string)", "got", rec)
-	} else if err != io.EOF {
-		t.Log("Reading the end of the stream should EOF error")
+	}
+	if err != io.EOF {
+		t.Log("Reading the end of the stream should return EOF error")
 		t.Error("expected", io.EOF, "got", err)
 	}
 }

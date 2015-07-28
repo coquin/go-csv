@@ -46,7 +46,7 @@ type Writer struct {
 }
 
 func (w *Writer) Write(record []string) error {
-	str := ""
+	var str string
 
 	if w.pos > 0 {
 		str = "\n"

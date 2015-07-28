@@ -30,6 +30,12 @@ func (r *Reader) Read() (record []string, err error) {
 	record = strings.Split(str, string(r.Comma))
 	err = nil
 
+	for idx, recStr := range record {
+		recStr = strings.Trim(recStr, "\"")
+		recStr = strings.Replace(recStr, "\"\"", "\"", -1)
+		record[idx] = recStr
+	}
+
 	r.pos = i + 1
 	return
 }

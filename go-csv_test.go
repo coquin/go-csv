@@ -89,6 +89,28 @@ func TestReadCustomComma(t *testing.T) {
 	}
 }
 
+func TestReadQuotes(t *testing.T) {
+	var rec []string
+
+	csvReader := NewReader(strings.NewReader("foo,\"bar\",baz\nnyan,\"Tyrion \"\"Imp\"\" Lannister\",wat"))
+
+	rec, _ = csvReader.Read()
+	expectedFirst := []string{"foo", "bar", "baz"}
+
+	if !compareRecords(rec, expectedFirst) {
+		t.Log("Read should unquote qouted fields")
+		t.Error("expected", expectedFirst, "got", rec)
+	}
+
+	rec, _ = csvReader.Read()
+	expectedLast := []string{"nyan", "Tyrion \"Imp\" Lannister", "wat"}
+
+	if !compareRecords(rec, expectedLast) {
+		t.Log("Read should unescape doubled quotes")
+		t.Error("expected", expectedLast, "got", rec)
+	}
+}
+
 func TestWrite(t *testing.T) {
 	buf := bytes.NewBuffer([]byte{})
 	csvWriter := NewWriter(buf)

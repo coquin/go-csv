@@ -111,6 +111,18 @@ func TestReadQuotes(t *testing.T) {
 	}
 }
 
+func TestReadSpecialCharsInQuotedFields(t *testing.T) {
+	csvReader := NewReader(strings.NewReader("Track,\"Daddy, Brother, Lover, Little Boy\",\"Lean Into It\",1991,Mr. Big"))
+
+	rec, _ := csvReader.Read()
+	expected := []string{"Track", "Daddy, Brother, Lover, Little Boy", "Lean Into It", "1991", "Mr. Big"}
+
+	if !compareRecords(rec, expected) {
+		t.Log("Read should keep special characters (commas) in quoted fields")
+		t.Error("expected", expected, "got", rec)
+	}
+}
+
 func TestWrite(t *testing.T) {
 	buf := bytes.NewBuffer([]byte{})
 	csvWriter := NewWriter(buf)

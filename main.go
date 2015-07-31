@@ -3,6 +3,7 @@ package gocsv
 import (
 	"io"
 	"io/ioutil"
+	"regexp"
 	"strings"
 )
 
@@ -26,8 +27,21 @@ func (r *Reader) Read() (record []string, err error) {
 		}
 	}
 
+	// "        Match any double quote
+	// (?:      Containing noncapturing group
+	//    [^\"] of non-double quotes
+	//    |     OR
+	//    \"\"  pair of consecutive double quotes
+	// )+       at least one match
+	// \"       ending with double quote (i.e. any letters between two quotes, plus pairs of consecutive double quotes)
+	// |        OR
+	// [^       NOT
+	//    ,\"   comma (r.Comma) followed by double quote
+	// ]*       zero or more matches
+	rgx := regexp.MustCompile("\"(?:[^\"]|\"\")+\"|[^" + string(r.Comma) + "\"]*")
+
 	str := string(r.b[r.pos:i])
-	record = strings.Split(str, string(r.Comma))
+	record = rgx.FindAllString(str, -1)
 	err = nil
 
 	for idx, recStr := range record {

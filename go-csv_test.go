@@ -15,7 +15,7 @@ func TestRead(t *testing.T) {
 	var rec []string
 	var err error
 
-	csvReader := NewReader(strings.NewReader("foo,bar,baz\nnyan,cat,wat"))
+	csvReader := NewReader(strings.NewReader("foo,bar,baz\nnyan,cat,wat\npeow,,"))
 
 	rec, err = csvReader.Read()
 	expectedFirst := []string{"foo", "bar", "baz"}
@@ -30,15 +30,18 @@ func TestRead(t *testing.T) {
 	}
 
 	rec, err = csvReader.Read()
-	expectedLast := []string{"nyan", "cat", "wat"}
+	expectedSecond := []string{"nyan", "cat", "wat"}
 
-	if !compareRecords(rec, expectedLast) {
+	if !compareRecords(rec, expectedSecond) {
 		t.Log("Read should read first string")
-		t.Fatal("expected", expectedLast, "got", rec)
+		t.Fatal("expected", expectedSecond, "got", rec)
 	}
-	if err != nil {
-		t.Log("Read should not return error on success")
-		t.Error("expected", nil, "got", err)
+
+	rec, err = csvReader.Read()
+	expectedLast := []string{"peow", "", ""}
+	if !compareRecords(rec, expectedLast) {
+		t.Log("Read should read empty fields as empty strings")
+		t.Fatal("expected", expectedLast, "got", rec)
 	}
 
 	rec, err = csvReader.Read()

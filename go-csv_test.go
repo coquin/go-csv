@@ -92,10 +92,10 @@ func TestReadCustomComma(t *testing.T) {
 func TestReadQuotes(t *testing.T) {
 	var rec []string
 
-	csvReader := NewReader(strings.NewReader("foo,\"bar\",baz\nnyan,\"Tyrion \"\"Imp\"\" Lannister\",wat"))
+	csvReader := NewReader(strings.NewReader("foo,\"bar\",\"\"\"baz\"\"\"\nnyan,\"Tyrion \"\"Imp\"\" Lannister\",wat"))
 
 	rec, _ = csvReader.Read()
-	expectedFirst := []string{"foo", "bar", "baz"}
+	expectedFirst := []string{"foo", "bar", "\"baz\""}
 
 	if !compareRecords(rec, expectedFirst) {
 		t.Log("Read should unquote qouted fields")

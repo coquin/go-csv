@@ -38,14 +38,15 @@ func (r *Reader) Read() (record []string, err error) {
 	// [^       NOT
 	//    ,\"   comma (r.Comma) followed by double quote
 	// ]*       zero or more matches
-	rgx := regexp.MustCompile("\"(?:[^\"]|\"\")+\"|[^" + string(r.Comma) + "\"]*")
+	splitRgx := regexp.MustCompile("\"(?:[^\"]|\"\")+\"|[^" + string(r.Comma) + "\"]*")
+	trimQuotesRgx := regexp.MustCompile("^\"|\"$")
 
 	str := string(r.b[r.pos:i])
-	record = rgx.FindAllString(str, -1)
+	record = splitRgx.FindAllString(str, -1)
 	err = nil
 
 	for idx, recStr := range record {
-		recStr = strings.Trim(recStr, "\"")
+		recStr = trimQuotesRgx.ReplaceAllLiteralString(recStr, "")
 		recStr = strings.Replace(recStr, "\"\"", "\"", -1)
 		record[idx] = recStr
 	}

@@ -3,6 +3,7 @@ package gocsv
 import (
 	"bytes"
 	"io"
+	"os"
 	"strings"
 	"testing"
 )
@@ -123,6 +124,43 @@ func TestReadSpecialCharsInQuotedFields(t *testing.T) {
 	if !compareRecords(rec, expected) {
 		t.Log("Read should keep special characters (commas) in quoted fields")
 		t.Error("expected", expected, "got", rec)
+	}
+}
+
+func TestReadFromFile(t *testing.T) {
+	sample, err := os.Open("test-csv/1.csv")
+
+	if err != nil {
+		t.Fatal("Error during reading sample CSV file:", err)
+	}
+
+	defer sample.Close()
+
+	csvReader := NewReader(sample)
+
+	expected := [][]string{
+		{"Jaime", "Lannister", "Kingslayer", ""},
+		{"Robert", "Baratheon", "", "dead"},
+		{"Eddard", "Stark", "", "dead"},
+		{"Tyrion", "Lannister", "Imp", ""},
+		{"John", "Snow", "You know nothing", "dead (GRM you're bastard!)"},
+		{"Daenerys", "Targarien", "\"Stormborn\", \"Unburnt\"", ""},
+	}
+
+	for idx := 0; ; idx++ {
+		rec, err := csvReader.Read()
+
+		if err == io.EOF {
+			break
+		}
+		if !compareRecords(rec, expected[idx]) {
+			t.Log("Should read records from file correctly")
+			t.Fatal("expected", expected[idx], "got", rec)
+		}
+		if err != nil {
+			t.Log("Read should not return error on success")
+			t.Error("expected", nil, "got", err)
+		}
 	}
 }
 

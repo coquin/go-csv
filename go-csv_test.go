@@ -181,6 +181,18 @@ func TestWrite(t *testing.T) {
 	}
 }
 
+func TestWriteCustomComma(t *testing.T) {
+	buf := bytes.NewBuffer([]byte{})
+	csvWriter := NewWriter(buf)
+	csvWriter.Comma = '|'
+
+	csvWriter.Write([]string{"foo", "bar", "baz"})
+	if buf.String() != "foo|bar|baz" {
+		t.Log("Write should write array of strings using custom delimiter")
+		t.Fatal("expected", "foo|bar|baz", "got", buf.String())
+	}
+}
+
 func compareRecords(a, b []string) bool {
 	if len(a) != len(b) {
 		return false

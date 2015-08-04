@@ -71,12 +71,22 @@ func (w *Writer) Write(record []string) error {
 
 	if w.pos > 0 {
 		str = "\n"
+		w.pos++
 	}
 
-	str += strings.Join(record, string(w.Comma))
+	for idx, r := range record {
+		l := len(r)
+		w.pos += l
+		str += r
+
+		if idx < l-1 {
+			str += string(w.Comma)
+			w.pos++
+		}
+	}
+
 	_, err := w.w.Write([]byte(str))
 
-	w.pos++
 	return err
 }
 

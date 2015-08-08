@@ -96,13 +96,13 @@ func TestReadCustomComma(t *testing.T) {
 func TestReadQuotes(t *testing.T) {
 	var rec []string
 
-	csvReader := NewReader(strings.NewReader("foo,\"bar\",\"\"\"baz\"\"\"\nnyan,\"Tyrion \"\"Imp\"\" Lannister\",wat"))
+	csvReader := NewReader(strings.NewReader("\"foo\",\"\"bar\"\",\"\"\"baz\"\"\"\nnyan,Tyrion \"\"Imp\"\" Lannister,wat"))
 
 	rec, _ = csvReader.Read()
-	expectedFirst := []string{"foo", "bar", "\"baz\""}
+	expectedFirst := []string{"foo", "\"bar\"", "\"baz\""}
 
 	if !compareRecords(rec, expectedFirst) {
-		t.Log("Read should unquote qouted fields")
+		t.Log("Read should unquote qouted fields and escape double quotes")
 		t.Error("expected", expectedFirst, "got", rec)
 	}
 
@@ -116,14 +116,26 @@ func TestReadQuotes(t *testing.T) {
 }
 
 func TestReadSpecialCharsInQuotedFields(t *testing.T) {
-	csvReader := NewReader(strings.NewReader("Track,\"Daddy, Brother, Lover, Little Boy\",\"Lean Into It\",1991,Mr. Big"))
+	testStr := []string{
+		"Track,\"Daddy, Brother, Lover, Little Boy\",\"Lean Into It\",1991,Mr. Big",
+		"\"\"\"Daddy, Brother, Lover, Little Boy\"\"\"",
+	}
+	csvReader := NewReader(strings.NewReader(strings.Join(testStr, "\n")))
 
 	rec, _ := csvReader.Read()
-	expected := []string{"Track", "Daddy, Brother, Lover, Little Boy", "Lean Into It", "1991", "Mr. Big"}
+	expectedFirst := []string{"Track", "Daddy, Brother, Lover, Little Boy", "Lean Into It", "1991", "Mr. Big"}
 
-	if !compareRecords(rec, expected) {
+	if !compareRecords(rec, expectedFirst) {
 		t.Log("Read should keep special characters (commas) in quoted fields")
-		t.Error("expected", expected, "got", rec)
+		t.Error("expectedFirst", expectedFirst, "got", rec)
+	}
+
+	rec, _ = csvReader.Read()
+	expectedLast := []string{"\"Daddy, Brother, Lover, Little Boy\""}
+
+	if !compareRecords(rec, expectedLast) {
+		t.Log("Read should keep special characters (commas) in quoted fields")
+		t.Error("expectedLast", expectedLast, "got", rec)
 	}
 }
 

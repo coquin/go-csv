@@ -27,18 +27,28 @@ func (r *Reader) Read() (record []string, err error) {
 		}
 	}
 
-	// "        Match any double quote
-	// (?:      Containing noncapturing group
-	//    [^\"] of non-double quotes
-	//    |     OR
-	//    \"\"  pair of consecutive double quotes
-	// )+       at least one match
-	// \"       ending with double quote (i.e. any letters between two quotes, plus pairs of consecutive double quotes)
-	// |        OR
-	// [^       NOT
-	//    ,\"   comma (r.Comma) followed by double quote
-	// ]*       zero or more matches
-	splitRgx := regexp.MustCompile("\"(?:[^\"]|\"\")+\"|[^" + string(r.Comma) + "\"]*")
+	strComma := string(r.Comma)
+
+	// Regular expression to split records by commas or quotes using following rules:
+	// 1) Match quoted fields with quoted (with pairs of double quotes) words:
+	//    "         match single starting double quote
+	//      [^,"]*  followed with any non-comma (r.Comma) and double quote characters
+	//      ""      followed with pair of opening double quotes
+	//        .+    followed with at least one character
+	//      ""      followed with pair of closing double quotes
+	//      [^,"]*  followed with any non-comma (r.Comma) and double quote characters
+	//    "         finished with single ending double quote
+	//    |         OR
+	// 2) Match any string between commas, bypassing commas between pairs of double quotes:
+	//    [^,\"]*   match any non-comma (r.Comma) and double quote characters
+	//    ""        followed with pair of opening double quotes
+	//      [^\"]+  followed with at least one non double quote character
+	//    ""        followed with pair of closing double quotes
+	//    [^,\"]*   finished with any non-comma (r.Comma) and double quote characters
+	//    |         OR
+	// 3) Match any string between commas
+	//    [^,]*
+	splitRgx := regexp.MustCompile("\"[^" + strComma + "\"]*\"\".+\"\"[^" + strComma + "\"]*\"|[^" + strComma + "\"]*\"\"[^\"]+\"\"[^" + strComma + "\"]*|\"[^\"]+\"|[^" + strComma + "]*")
 	trimQuotesRgx := regexp.MustCompile("^\"|\"$")
 
 	str := string(r.b[r.pos:i])

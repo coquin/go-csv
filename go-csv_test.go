@@ -188,7 +188,7 @@ func TestWrite(t *testing.T) {
 
 	csvWriter.Write([]string{"nyan", "cat", "wat"})
 	if buf.String() != "foo,bar,baz\nnyan,cat,wat" {
-		t.Log("Write should append array of strings")
+		t.Log("Write should append new string")
 		t.Fatal("expected", "foo,bar,baz\\nnyan,cat,wat", "got", buf.String())
 	}
 }
@@ -202,6 +202,45 @@ func TestWriteCustomComma(t *testing.T) {
 	if buf.String() != "foo|bar|baz" {
 		t.Log("Write should write array of strings using custom delimiter")
 		t.Fatal("expected", "foo|bar|baz", "got", buf.String())
+	}
+}
+
+func TestWriteQuotesEscaped(t *testing.T) {
+	buf := bytes.NewBuffer([]byte{})
+	csvWriter := NewWriter(buf)
+
+	csvWriter.Write([]string{"nyan", "Tyrion \"Imp\" Lannister", "wat"})
+	expected := "nyan,Tyrion \"\"Imp\"\" Lannister,wat"
+
+	if buf.String() != expected {
+		t.Log("Write should escape quotes inside field and wrap field in quotes")
+		t.Fatal("expected", expected, "got", buf.String())
+	}
+}
+
+func TestWriteSpecialCharacters(t *testing.T) {
+	buf := bytes.NewBuffer([]byte{})
+	csvWriter := NewWriter(buf)
+
+	csvWriter.Write([]string{"foo, bar", "baz"})
+	expected := "\"foo, bar\",baz"
+
+	if buf.String() != expected {
+		t.Log("Write should put field with special characters in quotes")
+		t.Fatal("expected", expected, "got", buf.String())
+	}
+}
+
+func TestWriteSpecialCharactersQuoted(t *testing.T) {
+	buf := bytes.NewBuffer([]byte{})
+	csvWriter := NewWriter(buf)
+
+	csvWriter.Write([]string{"foo \"bar, baz\"", "quix"})
+	expected := "foo \"\"bar, baz\"\",quix"
+
+	if buf.String() != expected {
+		t.Log("Write should not put field with special characters in quotes special chars already in quotes (should escape with pairs of quotes instead)")
+		t.Fatal("expected", expected, "got", buf.String())
 	}
 }
 

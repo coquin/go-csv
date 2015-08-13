@@ -77,23 +77,27 @@ type Writer struct {
 }
 
 func (w *Writer) Write(record []string) error {
-	var str string
+	specialCharsGroup := string(w.Comma)
+	specialCharsRgx := regexp.MustCompile("^[^\"]*[" + specialCharsGroup + "][^\"]*$")
+
+	for idx, r := range record {
+		if specialCharsRgx.MatchString(r) {
+			r = "\"" + r + "\""
+		} else {
+			r = strings.Replace(r, "\"", "\"\"", -1)
+		}
+
+		record[idx] = r
+	}
+
+	str := strings.Join(record, string(w.Comma))
 
 	if w.pos > 0 {
-		str = "\n"
+		str = "\n" + str
 		w.pos++
 	}
 
-	for idx, r := range record {
-		l := len(r)
-		w.pos += l
-		str += r
-
-		if idx < l-1 {
-			str += string(w.Comma)
-			w.pos++
-		}
-	}
+	w.pos += len(str)
 
 	_, err := w.w.Write([]byte(str))
 

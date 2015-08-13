@@ -5,6 +5,8 @@ _I wrote this package while I was learning Golang. It should work, but if you ne
 
 ### Usage
 
+#### Reading
+
 Read CSV text with reader, for example:
 
 ```
@@ -34,4 +36,28 @@ for {
 		break
 	}
 }
+```
+
+#### Writing
+
+To write slice of string in CSV format create a new Writer:
+
+```
+buf := bytes.NewBuffer([]byte{})
+csvWriter := gocsv.NewWriter(buf)
+```
+
+or
+
+```
+file, _ := os.Create(CSVFilePath)
+csvWriter := gocsv.NewWriter(file)
+```
+
+Now you can write slices of string into this writer:
+
+```
+csvWriter.write([]string{"foo", "bar", "baz"})
+csvWriter.write([]string{"nyan", "cat", "wat"})
+
 ```

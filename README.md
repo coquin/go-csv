@@ -40,7 +40,7 @@ for {
 
 #### Writing
 
-To write slice of string in CSV format create a new Writer:
+To write you need to create a new Writer:
 
 ```
 buf := bytes.NewBuffer([]byte{})
@@ -54,7 +54,7 @@ file, _ := os.Create(CSVFilePath)
 csvWriter := gocsv.NewWriter(file)
 ```
 
-Now you can write slices of string into this writer:
+Now you can write slices of strings into this writer:
 
 ```
 csvWriter.write([]string{"foo", "bar", "baz"})
